@@ -26,7 +26,9 @@ lean_lib LeanDepsTestModules where
   globs := #[.submodules `LeanDepsTests]
 
 /-- `lake test`: the library's checks and the built `deps` run on fixture
-packages (`LeanDepsTests.lean`). -/
+packages (`LeanDepsTests.lean`). It needs every default target, so that
+`lake test` alone, the gate `.rr2/check` runs, also builds what `lake build`
+builds; a new default target goes into `needs` too. -/
 lean_exe tests where
   root := `LeanDepsTests
-  needs := #[deps]
+  needs := #[LeanDeps, deps]

@@ -31,6 +31,6 @@ A check writes `import LeanDeps` and asks the same graph: `LeanDeps.load dir`, t
 
 ## Checks
 
-`lake build`, `lake test`.
+`lake build`, `lake test`. Before a change lands on `main`, the queue runner rr2 runs `main`'s `.rr2/check` on it: `lake test`, which builds every default target, runs the checks and builds a consumer package that requires this one.
 
 Apache License 2.0.
