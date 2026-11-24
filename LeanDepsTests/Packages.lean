@@ -6,7 +6,7 @@ on them (which files are sources, which headers fail the graph) and the
 built `deps` command run in them (its output, `--json`, the fallback,
 unknown modules, exit codes). -/
 
-namespace Tests.Packages
+namespace LeanDepsTests.Packages
 
 open Deps
 open Lean (Json)
@@ -191,4 +191,4 @@ def check : IO (Array String) := do
   finally
     if ← root.pathExists then IO.FS.removeDirAll root
 
-end Tests.Packages
+end LeanDepsTests.Packages
