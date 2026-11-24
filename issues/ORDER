@@ -1,7 +1,7 @@
 ## Next, in order
 
-5kekon .rr2/check: run lake test, with its consumer-package build, on every merge candidate
-
 ## Proposed
+
+aiisdp Nothing checks that the test driver needs every default target
 
 ## Needs a decision
