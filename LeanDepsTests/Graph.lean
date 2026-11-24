@@ -1,10 +1,10 @@
-import Deps.Load
+import LeanDeps.Load
 
-/-! The pure graph (`Deps.Graph`): closures both ways through chains and a
+/-! The pure graph (`LeanDeps.Graph`): closures both ways through chains and a
 cycle, modules outside the graph, the test filter, and paths resolved to
 modules or to the fallback. -/
 
-open Deps
+open LeanDeps
 
 def fixture : Graph :=
   match Graph.ofModules #[

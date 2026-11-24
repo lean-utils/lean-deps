@@ -15,7 +15,7 @@ lexer would end early, as in `A#check`, a part starting with a digit, an
 header *not read whole*: `imports?` then answers none, never a list that
 might miss an import. -/
 
-namespace Deps.Header
+namespace LeanDeps.Header
 
 /-- Whether `s` is a module name this reader reads: dot-separated parts,
 each of ASCII letters, digits and `_`, not starting with a digit. Lean
@@ -102,4 +102,4 @@ def imports? (text : String) : Option (Array String) :=
   | (imports, true) => some imports.eraseDups.toArray
   | (_, false) => none
 
-end Deps.Header
+end LeanDeps.Header

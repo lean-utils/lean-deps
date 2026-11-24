@@ -1,9 +1,9 @@
-import Deps
+import LeanDeps
 import Lean.Data.Json
 
 /-! `lake exe deps [--json] (<path|module> | --path PATH | --module MODULE)`,
 run in a package's directory: the module's direct and transitive imports and
-importers and the tests that import it (`Deps.Graph`), as grouped plain text
+importers and the tests that import it (`LeanDeps.Graph`), as grouped plain text
 or, with `--json`, one JSON object.
 
 - An input without `--path` or `--module` is the module of that name when
@@ -16,7 +16,7 @@ or, with `--json`, one JSON object.
   read as the module name `x.c`. A path starting with a dash is passed
   with `./` before it.
 - A module name not among the package's modules fails, exit 1, as does a
-  package whose graph cannot be built (`Deps.load`). A usage error exits 2.
+  package whose graph cannot be built (`LeanDeps.load`). A usage error exits 2.
   Both print only to standard error, also with `--json`.
 
 The JSON object: `{"status": "ok", "module", "file", "test", "imports":
@@ -27,7 +27,7 @@ transitive lists hold the direct ones and never the module itself;
 `outside` are the direct imports outside the package's sources, not
 followed. -/
 
-open Deps
+open LeanDeps
 open Lean (Json)
 
 /-- What the command was asked. -/
@@ -112,7 +112,7 @@ def main (args : List String) : IO UInt32 := do
   let req ← match parseArgs args false none with
     | .ok r => pure r
     | .error e => IO.eprintln s!"deps: {e}\n{usage}"; return 2
-  let g ← match ← Deps.load "." with
+  let g ← match ← LeanDeps.load "." with
     | .ok g => pure g
     | .error es =>
       IO.eprintln s!"deps: the import graph cannot be built:\n{"\n".intercalate (es.toList.map ("  " ++ ·))}"

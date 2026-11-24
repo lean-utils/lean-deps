@@ -1,14 +1,14 @@
-import Deps
+import LeanDeps
 import Lean.Data.Json
 
-/-! Fixture packages written to a fresh directory under `.lake/`: `Deps.load`
+/-! Fixture packages written to a fresh directory under `.lake/`: `LeanDeps.load`
 on them (which files are sources, which headers fail the graph) and the
 built `deps` command run in them (its output, `--json`, the fallback,
 unknown modules, exit codes). -/
 
 namespace LeanDepsTests.Packages
 
-open Deps
+open LeanDeps
 open Lean (Json)
 
 /-- Writes `files` (path relative to `dir`, text) under `dir`, which is
@@ -67,7 +67,7 @@ def checkMain (root : System.FilePath) : IO (Array String) := do
   let dir := root / "main"
   writePackage dir mainPackage
   let mut failures := #[]
-  match ← Deps.load dir with
+  match ← LeanDeps.load dir with
   | .error es => failures := failures.push s!"load main: {es}"
   | .ok g =>
     failures := failures ++ expect (g.names == #["Lib.A", "Lib.B", "Lib.C", "Main", "Tests", "Tests.A"])
@@ -136,7 +136,7 @@ def checkMain (root : System.FilePath) : IO (Array String) := do
     s!"deps --json lakefile.lean: {r.stdout}"
   return failures
 
-/-- Packages whose graph cannot be built: `Deps.load` names the file, and
+/-- Packages whose graph cannot be built: `LeanDeps.load` names the file, and
 `deps` fails naming it, for any input. -/
 def checkBroken (root : System.FilePath) : IO (Array String) := do
   let mut failures := #[]
@@ -148,7 +148,7 @@ def checkBroken (root : System.FilePath) : IO (Array String) := do
     let dir := root / name
     writePackage dir files
     for (target, link) in links do symlink dir target link
-    match ← Deps.load dir with
+    match ← LeanDeps.load dir with
     | .ok _ => failures := failures.push s!"load {name}: built a graph"
     | .error es =>
       failures := failures ++ expect (es.size == 1 && es.all (·.startsWith culprit)) s!"load {name}: {es}"
@@ -168,7 +168,7 @@ def checkLinks (root : System.FilePath) : IO (Array String) := do
   symlink dir "Lib/C.lean" "lakefile.lean"
   symlink dir "Lib" "Linked"
   let mut failures := #[]
-  match ← Deps.load dir with
+  match ← LeanDeps.load dir with
   | .error es => failures := failures.push s!"load links: {es}"
   | .ok g => failures := failures ++ expect (g.names == #["Lib.C"]) s!"links' modules: {g.names}"
   failures := failures ++ (← expectRun dir #["--path", "lakefile.lean"] 0

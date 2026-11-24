@@ -2,10 +2,10 @@ import Std.Data.HashMap
 import Std.Data.HashSet
 
 /-! The import graph of a package's sources: its modules, each with its file
-and the imports its header names, and the edges both ways. Pure: `Deps.load`
+and the imports its header names, and the edges both ways. Pure: `LeanDeps.load`
 reads a directory into one. Module names are strings (`Game.Files`). -/
 
-namespace Deps
+namespace LeanDeps
 
 /-- A module of the package's sources: its name, its file relative to the
 package directory (`Game/Files.lean`) and the modules its header imports, in
@@ -103,4 +103,4 @@ def Graph.importingTests (g : Graph) (name : String) : Array String :=
 def Graph.outside (g : Graph) (name : String) : Array String :=
   (g.imports name).filter (!g.contains ·)
 
-end Deps
+end LeanDeps

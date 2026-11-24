@@ -1,9 +1,9 @@
-import Deps.Header
+import LeanDeps.Header
 
-/-! The header reader (`Deps.Header.imports?`): the forms it reads, where
+/-! The header reader (`LeanDeps.Header.imports?`): the forms it reads, where
 the header ends, and the forms it refuses rather than miss an import. -/
 
-open Deps.Header
+open LeanDeps.Header
 
 -- Imports up to the first command; a doc comment ends the header.
 #guard imports? "import Game.Files\nimport Tests.Drive\n\n/-! doc -/\nimport Not.This\n" ==

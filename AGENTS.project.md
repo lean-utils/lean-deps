@@ -9,6 +9,6 @@
 
 ## Map
 
-- `Deps/Header.lean`: the plain header reader (pure; its grammar is its contract). `Deps/Graph.lean`: the graph and its closures (pure). `Deps/Load.lean`: the package directory read into a graph, and paths resolved to modules (the only IO of the library). `Deps.lean`: the library a consumer imports; it imports nothing of `Lean` or `Lake`.
-- `DepsMain.lean`: the command `deps` (arguments, text and JSON output; `Lean.Data.Json` is used here only).
+- `LeanDeps/Header.lean`: the plain header reader (pure; its grammar is its contract). `LeanDeps/Graph.lean`: the graph and its closures (pure). `LeanDeps/Load.lean`: the package directory read into a graph, and paths resolved to modules (the only IO of the library). `LeanDeps.lean`: the library a consumer imports; it imports nothing of `Lean` or `Lake`.
+- `LeanDepsMain.lean`: the command `deps` (arguments, text and JSON output; `Lean.Data.Json` is used here only).
 - `LeanDepsTests.lean` and `LeanDepsTests/` (named after this package, since a consumer's workspace resolves module names here too: a generic `Tests` would take the consumer's own): `#guard`s of the reader and the graph, and fixture packages under `.lake/test-packages/` on which the built `deps` runs.

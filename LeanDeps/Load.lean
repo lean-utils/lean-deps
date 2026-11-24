@@ -1,5 +1,5 @@
-import Deps.Header
-import Deps.Graph
+import LeanDeps.Header
+import LeanDeps.Graph
 
 /-! The graph of a package directory, read from its files, and the module a
 path or a name given on the command line is.
@@ -15,7 +15,7 @@ source import graph, not the modules a Lake target builds: a `.lean` file
 no library's roots or globs name is a module here too, and a library with
 another `srcDir` is not read as Lake reads it. -/
 
-namespace Deps
+namespace LeanDeps
 
 /-- The module `rel`, a path relative to the package directory, names:
 `A/B.lean` → `A.B`; none for a file that is not Lean, or whose path is no
@@ -105,4 +105,4 @@ def Graph.resolvePath (g : Graph) (path : System.FilePath) : Target :=
     | none => .fallback s!"{path} is no module of the package's sources"
   | none => .fallback s!"{path} is no Lean module of the package's sources"
 
-end Deps
+end LeanDeps
