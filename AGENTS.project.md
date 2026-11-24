@@ -6,3 +6,9 @@
 - The library's public functions and the command's output are public contracts: their doc comments say what they return and what they cannot know.
 - The queue is `issues/ORDER` with one `issues/ID.md` per item, in rr2's format (sections `## Next, in order`, `## Proposed`, `## Needs a decision`); it changes only through `rr2 issue add|move|edit|finish`, never by hand. An agent rr2 runs on an item changes no file under `issues/`.
 - Warnings fail the build.
+
+## Map
+
+- `Deps/Header.lean`: the plain header reader (pure; its grammar is its contract). `Deps/Graph.lean`: the graph and its closures (pure). `Deps/Load.lean`: the package directory read into a graph, and paths resolved to modules (the only IO of the library). `Deps.lean`: the library a consumer imports; it imports nothing of `Lean` or `Lake`.
+- `DepsMain.lean`: the command `deps` (arguments, text and JSON output; `Lean.Data.Json` is used here only).
+- `Tests.lean` and `Tests/`: `#guard`s of the reader and the graph, and fixture packages under `.lake/test-packages/` on which the built `deps` runs.
