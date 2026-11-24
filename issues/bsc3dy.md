@@ -1,5 +1,0 @@
-Test modules in their own namespace, so a consumer's `Tests` is not shadowed
-
-Found by grand-persuit's run oyjiyu (2026-11-24, BLOCKED): lean-deps at 052ba7673fcb declares `lean_lib TestModules` with the glob `Tests.*`, so in a package that requires lean-deps Lake looks for the consumer's own `Tests.*` modules in lean-deps and the consumer's `lake test` does not build. A library a consumer requires must not claim generic module names.
-
-Scope: move the tests under a namespace of this package's own (for example `LeanDepsTests` or `Deps.Tests`), rename the test library and its glob accordingly, keep `lake test` here green, and check the fix from a consumer: a scratch package outside this repository with its own `Tests` modules requiring this commit builds and runs its `lake test`. The importing-tests rule of the graph (`Graph.importingTests`, which treats `Tests` and modules under it as tests in the package it reads) stays as it is: it reads the consumer's modules, not this package's. After it lands the coordinator pushes it with a `pin/<sha12>` tag for grand-persuit's item oyjiyu.

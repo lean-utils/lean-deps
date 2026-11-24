@@ -1,7 +1,8 @@
 ## Next, in order
 
-bsc3dy Test modules in their own namespace, so a consumer's `Tests` is not shadowed
-
 ## Proposed
+
+a4ygow No required check builds a consumer package that requires lean-deps
+5kb4u3 The library `Deps` claims every consumer module named `Deps` or `Deps.*`
 
 ## Needs a decision
