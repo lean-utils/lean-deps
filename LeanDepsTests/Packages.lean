@@ -182,12 +182,68 @@ def checkLinks (root : System.FilePath) : IO (Array String) := do
     s!"deps through Linked: {r.stdout}{r.stderr}"
   return failures
 
+/-- A consumer that requires the package at `leanDeps` by path and has its
+own modules under the generic names a library or executable of that package
+claimed before (`Tests`, `Tests.*` until b2500c6; `Deps`, `Deps.*` and
+`DepsMain` until d68aa1d), and one that imports `LeanDeps` beside its own
+`Deps`. -/
+def consumerPackage (leanDeps : System.FilePath) (toolchain : String) : List (String × String) := [
+  ("lean-toolchain", toolchain),
+  ("lakefile.lean", "import Lake\nopen Lake DSL\n\npackage consumer where\n  testDriver := \"tests\"\n\n" ++
+    s!"require «lean-deps» from {repr leanDeps.toString}\n\n" ++
+    "@[default_target] lean_lib Deps where\n  globs := #[.andSubmodules `Deps]\n\n" ++
+    "@[default_target] lean_lib Tests where\n  globs := #[.andSubmodules `Tests]\n\n" ++
+    "@[default_target] lean_exe tool where\n  root := `DepsMain\n\n" ++
+    "@[default_target] lean_exe tests where\n  root := `Main\n"),
+  ("Deps.lean", "import Deps.X\n"),
+  ("Deps/X.lean", "def depsX := 1\n"),
+  ("Tests.lean", "import Tests.Imports\n"),
+  ("Tests/Imports.lean", "import LeanDeps\nimport Deps\n\ndef testsImports := depsX\n"),
+  ("DepsMain.lean", "import Deps\n\ndef main : IO Unit := IO.println depsX\n"),
+  ("Main.lean", "import Tests\n\ndef main : IO Unit := IO.println testsImports\n")]
+
+/-- The consumer above, written next to the other fixtures, built with the
+`lake` that runs these tests (`LAKE`, which `lake test` sets): its own
+modules build from its own files, its `lake test` and executable run them,
+and `lake exe deps` run in it answers a query on its graph. Appending to
+this package's `lakefile.lean` a library globbing `Tests.*`, or a library
+`Deps`, made the consumer's build fail; an executable rooted at `DepsMain`
+did not, with the pinned toolchain (an import resolves through libraries
+only, `Package.findModule?`). It covers only the names the consumer uses;
+the rule for every name a target here claims is in `lakefile.lean`. -/
+def checkConsumer (root : System.FilePath) : IO (Array String) := do
+  let some lake ← IO.getEnv "LAKE"
+    | return #["consumer: LAKE is not set; run the checks with `lake test`"]
+  let here ← IO.currentDir
+  let dir := root / "consumer"
+  writePackage dir (consumerPackage here (← IO.FS.readFile (here / "lean-toolchain")))
+  -- Lake extends an inherited `LEAN_PATH` and `LEAN_SRC_PATH` (`Lake.Env`'s
+  -- `initLeanPath`): clear this workspace's, which `lake test` set.
+  let env := #[("LEAN_PATH", none), ("LEAN_SRC_PATH", none)]
+  let lakeIn (args : Array String) := IO.Process.output { cmd := lake, args, cwd := some dir, env }
+  let r ← lakeIn #["build"]
+  if r.exitCode != 0 then
+    return #[s!"consumer: lake build: exit {r.exitCode}:\n{r.stdout}{r.stderr}"]
+  -- Both executables print `depsX`, so they ran the consumer's own modules.
+  let mut failures := #[]
+  for args in [#["test"], #["exe", "tool"]] do
+    let r ← lakeIn args
+    failures := failures ++ expect (r.exitCode == 0 && (r.stdout == "1\n" || r.stdout.endsWith "\n1\n"))
+      s!"consumer: lake {args}: expected exit 0 printing 1, got exit {r.exitCode}:\n{r.stdout}{r.stderr}"
+  let r ← lakeIn #["exe", "deps", "--json", "Deps.X"]
+  return failures ++ expect (r.exitCode == 0 && (Json.parse r.stdout).toOption.any fun j =>
+      field j "status" == "\"ok\"" && field j "file" == "\"Deps/X.lean\"" &&
+      field (j.getObjValD "importers") "transitive" ==
+        "[\"Deps\",\"DepsMain\",\"Main\",\"Tests\",\"Tests.Imports\"]")
+    s!"consumer: lake exe deps --json Deps.X: exit {r.exitCode}:\n{r.stdout}{r.stderr}"
+
 /-- Every failure of this module's checks, run in fixture packages under
 `.lake/test-packages/<pid>`, removed afterwards. -/
 def check : IO (Array String) := do
   let root := (← IO.currentDir) / ".lake" / "test-packages" / toString (← IO.Process.getPID)
   try
-    return (← checkMain root) ++ (← checkBroken root) ++ (← checkLinks root)
+    return (← checkMain root) ++ (← checkBroken root) ++ (← checkLinks root) ++
+      (← checkConsumer root)
   finally
     if ← root.pathExists then IO.FS.removeDirAll root
 
