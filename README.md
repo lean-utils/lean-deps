@@ -33,4 +33,4 @@ A check imports `Deps` and asks the same graph: `Deps.load dir`, then `Graph.imp
 
 `lake build`, `lake test`.
 
-MIT licence.
+Apache License 2.0.
