@@ -1,5 +1,7 @@
 ## Next, in order
 
+bsc3dy Test modules in their own namespace, so a consumer's `Tests` is not shadowed
+
 ## Proposed
 
 ## Needs a decision
